@@ -134,7 +134,7 @@ export default function Home() {
 
         {filteredUsers.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
-            এই গ্রুপে এখনও কোনো রক্তদাতা যুক্ত হননি। 😕
+           দুঃখিত এই গ্রুপের এখনও কোনো রক্তদাতা যুক্ত হননি। 😕
           </Text>
         ) : (
           filteredUsers.map((user, index) => (

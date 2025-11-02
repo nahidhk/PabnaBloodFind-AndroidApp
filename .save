@@ -1,0 +1,12 @@
+  <!-- This is a layout Data -->
+<!-- use This data layout.tsx -->
+
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: colorScheme === "dark" ? "#242424ff" : "#c9c9c9ff" },
+        ]}
+      >
+        <Navbar />
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaView>

@@ -1,5 +1,5 @@
 {
-    "popup":true,
+    "popup":false,
     "title":"update Available",
     "message":"A new update is available. Please update to the latest version for the best experience.",
     "url":"https://example.com/update",

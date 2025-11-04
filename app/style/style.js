@@ -1,8 +1,8 @@
-import { StyleSheet, Platform, StatusBar } from "react-native";
+import { StyleSheet } from "react-native";
 
 
 
-const syTop = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
+const syTop = null;
 
 
 export default StyleSheet.create({

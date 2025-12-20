@@ -15,7 +15,6 @@ import style from "./style/style";
 import Loadding from "@/components/Loadding";
 import ErrJsonx from "@/components/ErrJsonx";
 import serverLink from "@/components/ServerLink";
-import SideManue from "@/components/SideManu";
 
 export default function Home() {
   const [searchText, setSearchText] = useState("");
@@ -96,8 +95,7 @@ export default function Home() {
       style={{ backgroundColor: "#f9f9f9", flex: 1 }}
       contentContainerStyle={{ paddingBottom: 50 }}
     >
-      
-      <SideManu />
+
       
       <View style={style.viewBoxi}>
         <View style={{ margin: 10, zIndex: 1000 }}>
@@ -227,7 +225,7 @@ export default function Home() {
                       style={{ marginLeft: 10 }}
                     >
                       <FontAwesome
-                        name="facebook-square"
+                        name="telegram-square"
                         size={25}
                         color="#1877F2"
                       />

@@ -7,15 +7,16 @@ import {
     Alert,
     ActivityIndicator,
     Modal,
+    Linking,
 } from "react-native";
 import style from "./style/style";
-import { useRouter } from "expo-router";
+import { useRouter , router} from "expo-router";
 import ErrJsonx from "@/components/ErrJsonx";
 import serverLink from "@/components/ServerLink";
+import { dateFormate } from "../scripts/dateFormate";
 
 export default function Join() {
-    const router = useRouter();
-
+    const thdateFormate = dateFormate();
     // স্টেট ডিফাইন
     const [phoneNumber, setPhoneNumber] = useState("");
     const [loading, setLoading] = useState(false);
@@ -28,7 +29,15 @@ export default function Join() {
     const [editName, setEditName] = useState("");
     const [editAddress, setEditAddress] = useState("");
     const [editBlood, setEditBlood] = useState("");
-
+    const [editNumber, setEditNumber] = useState("");
+    const [id, setId] = useState("");
+    const jsonData = {
+        id: id,
+        phone: editNumber,
+        name: editName,
+        bloodgroup: editBlood,
+        address:editAddress
+    };
     // Data fetch
     useEffect(() => {
         const fetchData = async () => {
@@ -100,7 +109,9 @@ export default function Join() {
             setCurrentUser(user);
             setEditName(user.name);
             setEditAddress(user.address);
-            setEditBlood(user.blood);
+            setEditBlood(user.bloodgroup);
+            setEditNumber(user.phone);
+            setId(user.id);
             setModalVisible(true);
         }
 
@@ -162,7 +173,7 @@ export default function Join() {
                         <View style={style.popup}>
                             <Text style={style.bigText}>Already Created</Text>
                             <Text style={style.upper}>
-                                +880{phoneNumber.slice(1)} এই নাম্বার ব্যবহার করে ইতিমধ্যে প্রোফাইল তৈরি করা হয়েছে {"\n"}
+                                +880{phoneNumber.slice(1)} এই নাম্বার ব্যবহার করে ইতিমধ্যে {"\n"} {dateFormate(currentUser.created_at)} তারিখে প্রোফাইল তৈরি করা হয়েছে {"\n"}
                                 ID: {currentUser.id} {"\n"}
                                 নাম: {currentUser.name} {"\n"}
                                 ঠিকানা: {currentUser.address} {"\n"}
@@ -203,7 +214,7 @@ export default function Join() {
                                     }}
                                 >
                                     <Text style={{ color: "#ff0000", fontWeight: "600" }}>
-                                        Close
+                                        OK
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -229,6 +240,20 @@ export default function Join() {
                 >
                     <View style={style.popup}>
                         <Text style={style.bigText}>Edit Profile</Text>
+
+                        <TextInput
+                            value={id}
+                            onChangeText={setId}
+                            placeholder="Mobile Number Change"
+                            style={style.input}
+                        />
+
+                        <TextInput
+                            value={editNumber}
+                            onChangeText={setEditNumber}
+                            placeholder="Mobile Number Change"
+                            style={style.input}
+                        />
 
                         <TextInput
                             value={editName}
@@ -257,11 +282,9 @@ export default function Join() {
                             }}
                         >
                             <TouchableOpacity
-                                onPress={() =>
-                                    Alert.alert(
-                                        "Profile Updated!",
-                                        `নাম: ${editName}\nঠিকানা: ${editAddress}\nরক্ত: ${editBlood}`
-                                    )
+                                onPress={() => {
+                                    Linking.openURL(`mailto:nahid@ndsql.top?subject=Edit PabnaBloodFind Profile Id:${id}&body=${JSON.stringify(jsonData)}`)
+                                }
                                 }
                                 style={{
                                     backgroundColor: "#fff",
@@ -271,7 +294,7 @@ export default function Join() {
                                 }}
                             >
                                 <Text style={{ color: "#4680ff", fontWeight: "600" }}>
-                                    Save
+                                    Save Edit
                                 </Text>
                             </TouchableOpacity>
 

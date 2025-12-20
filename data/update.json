@@ -1,0 +1,13 @@
+{
+    "popup":false,
+    "title":"update Available",
+    "message":"A new update is available. Please update to the latest version for the best experience.",
+    "url":"https://example.com/update",
+    "conformButtonTitle":"Update Now",
+    "cancelButtonTitle":{
+        "title":"Exit",
+        "btnColorCode":"#ff0000",
+        "textColor":"#fff",
+        "buttonJSCode":"Linking.exitApp()"
+    }
+}

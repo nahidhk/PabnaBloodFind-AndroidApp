@@ -6,6 +6,14 @@ import { useState } from "react";
 export default function NewAdd() {
   const { mobileNumber } = useLocalSearchParams();
 
+              const validateEmail = (vemail) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+
+
+
   const [email, setEmail] = useState("");
   const [verOpen, setVeriOpen] = useState(false);
 
@@ -81,10 +89,12 @@ export default function NewAdd() {
 
           <Text
             onPress={() => {
-              if (!email) {
-                Alert.alert("Error", "অনুগ্রহ করে ইমেইল লিখুন");
-                return;
-              }
+
+if (!email || !validateEmail(email)) {
+  Alert.alert("Warning", "অনুগ্রহ করে সঠিক ইমেইল লিখুন");
+  return;
+}
+
               setVeriOpen(true);
             }}
           >

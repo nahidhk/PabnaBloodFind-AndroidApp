@@ -85,7 +85,7 @@ export default StyleSheet.create({
     borderRadius: 4,
     padding: 10,
     margin: 10,
-    textTransform: "uppercase"
+    //textTransform: "uppercase"
   },
   btn: {
     margin: 20,

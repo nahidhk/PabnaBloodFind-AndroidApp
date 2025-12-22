@@ -7,7 +7,9 @@ import {
 	Alert,
 	ActivityIndicator,
 	Modal,
-	Linking
+	Linking,
+	Button,
+	FlatList
 } from "react-native";
 import style from "./style/style";
 import { useRouter, router } from "expo-router";
@@ -17,7 +19,6 @@ import { dateFormate } from "../scripts/dateFormate";
 
 export default function Join() {
 	const thdateFormate = dateFormate();
-	// স্টেট ডিফাইন
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [users, setUsers] = useState([]);
@@ -25,6 +26,8 @@ export default function Join() {
 	const [editModalVisible, setEditModalVisible] = useState(false);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [error, setError] = useState(false);
+	const [openVarify, setOpenVarify] = useState(false);
+	const otp = Math.floor(1000 + Math.random() * 9000);
 
 	const [editName, setEditName] = useState("");
 	const [editAddress, setEditAddress] = useState("");
@@ -38,6 +41,7 @@ export default function Join() {
 		bloodgroup: editBlood,
 		address: editAddress
 	};
+	const [vailsystem, setVailSystem] = useState(true);
 	// Data fetch
 	useEffect(() => {
 		const fetchData = async () => {
@@ -62,8 +66,6 @@ export default function Join() {
 	if (error) {
 		return <ErrJsonx />;
 	}
-
-	// ফোন নম্বর চেক
 	const numberCheck = () => {
 		if (
 			phoneNumber.trim() === "" ||
@@ -76,19 +78,17 @@ export default function Join() {
 			);
 			return;
 		}
-
-		const teleNumber = phoneNumber.slice(1);
 		setLoading(true);
 
 		const filteredData = users.filter(item =>
-			String(item.phone).includes(teleNumber)
+			String(item.phone).includes(phoneNumber)
 		);
 
 		if (filteredData.length === 0) {
 			// নতুন প্রোফাইল
 			Alert.alert(
 				"ADD PROFILE",
-				`+880${teleNumber} এই নম্বর দিয়ে প্রোফাইল তৈরি নিশ্চিত`,
+				`+88${phoneNumber} এই নম্বর দিয়ে প্রোফাইল তৈরি নিশ্চিত`,
 				[
 					{ text: "বাতিল", style: "cancel" },
 					{
@@ -96,7 +96,7 @@ export default function Join() {
 						onPress: () => {
 							router.push({
 								pathname: "/NewAdd",
-								params: { mobileNumber: teleNumber }
+								params: { mobileNumber: phoneNumber }
 							});
 						}
 					}
@@ -127,6 +127,58 @@ export default function Join() {
 
 	const [email, setEmail] = useState("");
 	const [verOpen, setVeriOpen] = useState(false);
+
+
+
+	const mailVerify = () => {
+		if (!email || !validateEmail(email)) {
+			Alert.alert(
+				"Warning",
+				"অনুগ্রহ করে সঠিক ইমেইল লিখুন"
+			);
+			return;
+		}
+		const formData = new FormData();
+		formData.append("to", email);
+		formData.append("username", "pabnaBoldFind");
+		formData.append(
+			"subject",
+			`PabnaBloodFind App verification code ${otp}`
+		);
+		formData.append(
+			"message",
+			`
+			Hello ${currentUser.name},
+
+Your mobile number (+88${phoneNumber}) has been successfully registered with the PabnaBoldFind Android App.
+
+Your email verification code is: ${otp}
+
+Please complete the verification to enable your verified account.
+
+Thank you,
+NdSQL Team
+
+
+			`
+		);
+
+		fetch("https://mailr.ndsql.top/mail.php", {
+			method: "POST",
+			body: formData
+		})
+			.then(res => res.json())
+			.then(data => {
+				//	result.innerText = data.message;
+			})
+			.catch(err => {
+				//	result.innerText = "Error sending mail";
+			});
+		setVeriOpen(true);
+		setVailSystem(false);
+	}
+
+
 
 	return (
 		<View style={style.viewBox}>
@@ -166,81 +218,124 @@ export default function Join() {
 				</TouchableOpacity>
 			</View>
 
-			{/* Email join Systm*/}
-			<Modal
-				transparent={true}
-				visible={modalVisible}
-				animationType="slide"
-				onRequestClose={() => setModalVisible(false)}
-			>
-				<View>
-					<Text>Email (ইচ্ছাকৃত)</Text>
-					<TextInput
-						placeholder="e.g. username@gmail.com"
-						style={style.input}
-						value={email}
-						onChangeText={text => setEmail(text)}
-						keyboardType="email-address"
-						autoCapitalize="none"
-					/>
+			{/* ===========================Email System ================================== */}
 
-					<Text
-						onPress={() => {
-							if (!email || !validateEmail(email)) {
-								Alert.alert(
-									"Warning",
-									"অনুগ্রহ করে সঠিক ইমেইল লিখুন"
-								);
-								return;
-							}
-
-							const formData = new FormData();
-							formData.append("to", email);
-							formData.append("username", "pabnaBoldFind");
-							formData.append(
-								"subject",
-								"Pabna BloodFind Verify code <otp code>"
-							);
-							formData.append(
-								"message",
-								`Hello <Name> Your Mobile Number is <numbar> you have is a join
-								pabnaBoldFind Android App. \n  Your  Email Verify Code: <otp Code> \n
-								Verify complite to enebal Verifyed Based.`
-							);
-
-							fetch("https://mailr.ndsql.top/mail.php", {
-								method: "POST",
-								body: formData
-							})
-								.then(res => res.json())
-								.then(data => {
-									//	result.innerText = data.message;
-								})
-								.catch(err => {
-									//	result.innerText = "Error sending mail";
-								});
-							setVeriOpen(true);
-						}}
+			{
+				openVarify ? (
+					<Modal
+						transparent={true}
+						visible={true}
+						animationType="slide"
+						onRequestClose={() => setModalVisible(false)}
 					>
-						ইমেইল ভেরিফাই করতে{" "}
-						<Text style={{ color: "#4680ff" }}>Verify</Text>
-					</Text>
+						<View
+							style={{
+								flex: 1,
+								justifyContent: "center",
+								alignItems: "center",
+								backgroundColor: "rgba(0,0,0,0.5)"
+							}}
+						>
+							<View style={style.popup}>
+								<Text style={style.bigText}>Verify Profile</Text>
+								<View>
+									{
+										vailsystem ? (
+											<>									<Text>Email (ইচ্ছাকৃত)</Text>
+												<TextInput
+													placeholder="e.g. username@gmail.com"
+													style={style.input}
+													value={email}
+													onChangeText={text => setEmail(text)}
+													keyboardType="email-address"
+													autoCapitalize="none"
+												/>
+												<Button
+													title="Verify"
+													onPress={mailVerify}
+												/>
+											</>
 
-					{verOpen && (
-						<View>
-							<TextInput
-								style={style.input}
-								placeholder="Verify code"
-								keyboardType="number-pad"
-							/>
-							<Text>
-								Send Verify code agin
-								{"\n"}
-							</Text>
+										) : ""
+									}
+									{/* ==========********************** Email system **************************** */}
+
+									{verOpen && (
+										<View>
+											<Text>
+												{email}
+											</Text>
+											<TextInput
+												style={style.input}
+												placeholder="Verify code"
+												keyboardType="number-pad"
+												autoFocus
+											/>
+											<Button
+												title="Verify"
+											/>
+										</View>
+									)}
+								</View>
+
+
+
+
+								<View
+									style={{
+										marginTop: 10,
+										flexDirection: "row",
+										justifyContent: "space-between"
+									}}
+								>
+									<TouchableOpacity
+										onPress={() => {
+											router.push("/")
+										}}
+										style={{
+											backgroundColor: "#fff",
+											paddingHorizontal: 12,
+											paddingVertical: 8,
+											borderRadius: 5
+										}}
+									>
+										<Text
+											style={{
+												color: "#4680ff",
+												fontWeight: "600"
+											}}
+										>
+											Home
+										</Text>
+									</TouchableOpacity>
+
+									<TouchableOpacity
+										onPress={() => setModalVisible(false)}
+										style={{
+											backgroundColor: "#fff",
+											paddingHorizontal: 12,
+											paddingVertical: 8,
+											borderRadius: 5
+										}}
+									>
+										<Text
+											style={{
+												color: "#ff0000",
+												fontWeight: "600"
+											}}
+										>
+											Cancel
+										</Text>
+									</TouchableOpacity>
+								</View>
+							</View>
 						</View>
-					)}
-				</View>
-			</Modal>
+					</Modal>
+				) : ""
+			}
+
+			{/* //======================================================================= */}
+
 			{/* Already Created Modal */}
 			{currentUser && (
 				<Modal
@@ -269,7 +364,15 @@ export default function Join() {
 								ঠিকানা: {currentUser.address} {"\n"}
 								রক্ত: {currentUser.bloodgroup}
 							</Text>
-
+							<View>
+								<Button
+									title="Verify Profile"
+									onPress={() => {
+										setOpenVarify(true);
+										setModalVisible(false);
+									}}
+								/>
+							</View>
 							<View
 								style={{
 									marginTop: 10,

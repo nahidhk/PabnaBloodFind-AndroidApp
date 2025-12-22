@@ -150,10 +150,43 @@ export default StyleSheet.create({
   viewBoxi: {
     top: 60,
   },
-  inputx:{
-     borderWidth: 1,
+  inputx: {
+    borderWidth: 1,
     borderColor: "#888",
     borderRadius: 4,
     textTransform: "uppercase",
+  },
+  sidemanu: {
+    backgroundColor: "#fff",
+    height: "auto",
+    width: "250",
+    top: 50,
+    right: 0,
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    flexDirection: "column"
+  },
+  mybtn: {
+    width: "100%",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   }
 });

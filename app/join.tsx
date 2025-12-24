@@ -1,536 +1,436 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect
+} from "react";
 import {
-	View,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	Alert,
-	ActivityIndicator,
-	Modal,
-	Linking,
-	Button,
-	FlatList
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Modal,
+  Linking,
+  Button,
+  FlatList
 } from "react-native";
 import style from "./style/style";
-import { useRouter, router } from "expo-router";
+import {
+  useRouter,
+  router
+} from "expo-router";
 import ErrJsonx from "@/components/ErrJsonx";
 import serverLink from "@/components/ServerLink";
-import { dateFormate } from "../scripts/dateFormate";
+import {
+  dateFormate
+} from "../scripts/dateFormate";
 
 export default function Join() {
-	const thdateFormate = dateFormate();
-	const [phoneNumber, setPhoneNumber] = useState("");
-	const [loading, setLoading] = useState(false);
-	const [users, setUsers] = useState([]);
-	const [modalVisible, setModalVisible] = useState(false);
-	const [editModalVisible, setEditModalVisible] = useState(false);
-	const [currentUser, setCurrentUser] = useState(null);
-	const [error, setError] = useState(false);
-	const [openVarify, setOpenVarify] = useState(false);
-	const otp = Math.floor(1000 + Math.random() * 9000);
+  const thdateFormate = dateFormate();
+  const [phoneNumber,
+    setPhoneNumber] = useState("");
+  const [loading,
+    setLoading] = useState(false);
+  const [users,
+    setUsers] = useState([]);
+  const [modalVisible,
+    setModalVisible] = useState(false);
+  const [editModalVisible,
+    setEditModalVisible] = useState(false);
+  const [currentUser,
+    setCurrentUser] = useState(null);
+  const [error,
+    setError] = useState(false);
+  const [openVarify,
+    setOpenVarify] = useState(false);
+  const otp = Math.floor(1000 + Math.random() * 9000);
 
-	const [editName, setEditName] = useState("");
-	const [editAddress, setEditAddress] = useState("");
-	const [editBlood, setEditBlood] = useState("");
-	const [editNumber, setEditNumber] = useState("");
-	const [id, setId] = useState("");
-	const jsonData = {
-		id: id,
-		phone: editNumber,
-		name: editName,
-		bloodgroup: editBlood,
-		address: editAddress
-	};
-	const [vailsystem, setVailSystem] = useState(true);
-	// Data fetch
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true);
-			try {
-				const icx = await serverLink();
-				if (icx?.serverLink) {
-					const res = await fetch(icx.serverLink);
-					const data = await res.json();
-					setUsers(Array.isArray(data) ? data : []);
-				}
-				setLoading(false);
-			} catch (err) {
-				console.error("Fetch Error:", err);
-				setError(true);
-				setLoading(false);
-			}
-		};
-		fetchData();
-	}, []);
+  const [editName,
+    setEditName] = useState("");
+  const [editAddress,
+    setEditAddress] = useState("");
+  const [editBlood,
+    setEditBlood] = useState("");
+  const [editNumber,
+    setEditNumber] = useState("");
+  const [id,
+    setId] = useState("");
+  const jsonData = {
+    id: id,
+    phone: editNumber,
+    name: editName,
+    bloodgroup: editBlood,
+    address: editAddress
+  };
+  const [vailsystem,
+    setVailSystem] = useState(true);
+  // Data fetch
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const icx = await serverLink();
+        if (icx?.serverLink) {
+          const res = await fetch(icx.serverLink);
+          const data = await res.json();
+          setUsers(Array.isArray(data) ? data: []);
+        }
+        setLoading(false);
+      } catch (err) {
+        //  console.error("Fetch Error:", err);
+        setError(true);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  },
+    []);
 
-	if (error) {
-		return <ErrJsonx />;
-	}
-	const numberCheck = () => {
-		if (
-			phoneNumber.trim() === "" ||
-			phoneNumber.length !== 11 ||
-			!phoneNumber.startsWith("01")
-		) {
-			Alert.alert(
-				"ত্রুটি",
-				"দয়া করে সঠিক মোবাইল নাম্বার লিখুন (১১ ডিজিট, 01 দিয়ে শুরু , +৮৮ বাদে লিখুন )"
-			);
-			return;
-		}
-		setLoading(true);
+  if (error) {
+    return <ErrJsonx />;
+  }
+  const numberCheck = () => {
+    if (
+      phoneNumber.trim() === "" ||
+      phoneNumber.length !== 11 ||
+      !phoneNumber.startsWith("01")
+    ) {
+      Alert.alert(
+        "ত্রুটি",
+        "দয়া করে সঠিক মোবাইল নাম্বার লিখুন (১১ ডিজিট, 01 দিয়ে শুরু , +৮৮ বাদে লিখুন )"
+      );
+      return;
+    }
+    setLoading(true);
 
-		const filteredData = users.filter(item =>
-			String(item.phone).includes(phoneNumber)
-		);
+    const filteredData = users.filter(item =>
+      String(item.phone).includes(phoneNumber)
+    );
 
-		if (filteredData.length === 0) {
-			// নতুন প্রোফাইল
-			Alert.alert(
-				"ADD PROFILE",
-				`+88${phoneNumber} এই নম্বর দিয়ে প্রোফাইল তৈরি নিশ্চিত`,
-				[
-					{ text: "বাতিল", style: "cancel" },
-					{
-						text: "নিশ্চিত",
-						onPress: () => {
-							router.push({
-								pathname: "/NewAdd",
-								params: { mobileNumber: phoneNumber }
-							});
-						}
-					}
-				],
-				{ cancelable: false }
-			);
-		} else {
-			// ইতিমধ্যে প্রোফাইল
-			const user = filteredData[0];
-			setCurrentUser(user);
-			setEditName(user.name);
-			setEditAddress(user.address);
-			setEditBlood(user.bloodgroup);
-			setEditNumber(user.phone);
-			setId(user.id);
-			setModalVisible(true);
-		}
+    if (filteredData.length === 0) {
+      // নতুন প্রোফাইল
+      Alert.alert(
+        "ADD PROFILE",
+        `+88${phoneNumber} এই নম্বর দিয়ে প্রোফাইল তৈরি নিশ্চিত`,
+        [{
+          text: "বাতিল", style: "cancel"
+        },
+          {
+            text: "নিশ্চিত",
+            onPress: () => {
+              router.push({
+                pathname: "/NewAdd",
+                params: {
+                  mobileNumber: phoneNumber
+                }
+              });
+            }
+          }],
+        {
+          cancelable: false
+        }
+      );
+    } else {
+      // ইতিমধ্যে প্রোফাইল
+      const user = filteredData[0];
+      setCurrentUser(user);
+      setEditName(user.name);
+      setEditAddress(user.address);
+      setEditBlood(user.bloodgroup);
+      setEditNumber(user.phone);
+      setId(user.id);
+      setModalVisible(true);
+    }
 
-		setLoading(false);
-	};
+    setLoading(false);
+  };
 
-	// email system
+  // email system
 
-	const validateEmail = vemail => {
-		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-		return emailRegex.test(email);
-	};
+  const validateEmail = vemail => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
 
-	const [email, setEmail] = useState("");
-	const [verOpen, setVeriOpen] = useState(false);
+  const [email,
+    setEmail] = useState("");
+  const [verOpen,
+    setVeriOpen] = useState(false);
 
+  const mailVerify = () => {
+    if (!email || !validateEmail(email)) {
+      Alert.alert("Warning", "অনুগ্রহ করে সঠিক ইমেইল লিখুন");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("to", email);
+    formData.append("username", "pabnaBoldFind");
+    formData.append(
+      "subject",
+      `PabnaBloodFind App verification code ${otp}`
+    );
+    formData.append(
+      "message",
+      `
+      Hello ${currentUser.name},
 
+      Your mobile number (+88${phoneNumber}) has been successfully registered with the PabnaBoldFind Android App.
 
-	const mailVerify = () => {
-		if (!email || !validateEmail(email)) {
-			Alert.alert(
-				"Warning",
-				"অনুগ্রহ করে সঠিক ইমেইল লিখুন"
-			);
-			return;
-		}
-		const formData = new FormData();
-		formData.append("to", email);
-		formData.append("username", "pabnaBoldFind");
-		formData.append(
-			"subject",
-			`PabnaBloodFind App verification code ${otp}`
-		);
-		formData.append(
-			"message",
-			`
-			Hello ${currentUser.name},
+      Your email verification code is: ${otp}
 
-Your mobile number (+88${phoneNumber}) has been successfully registered with the PabnaBoldFind Android App.
+      Please complete the verification to enable your verified account.
 
-Your email verification code is: ${otp}
-
-Please complete the verification to enable your verified account.
-
-Thank you,
-NdSQL Team
-
-
-			`
-		);
-
-		fetch("https://mailr.ndsql.top/mail.php", {
-			method: "POST",
-			body: formData
-		})
-			.then(res => res.json())
-			.then(data => {
-				//	result.innerText = data.message;
-			})
-			.catch(err => {
-				//	result.innerText = "Error sending mail";
-			});
-		setVeriOpen(true);
-		setVailSystem(false);
-	}
+      Thank you,
+      NdSQL Team
 
 
+      `
+    );
 
-	return (
-		<View style={style.viewBox}>
-			<Text style={style.textCenter}>
-				{"\n\n\n"}
-				<Text style={style.bigText}>Create Profile</Text>
-				{"\n"}
-				<Text>
-					আমাদের সাথে যোগ দিতে আপনার ফোন নাম্বার দিয়ে ফরম পূরণ করুন
-				</Text>
-				/ {"\n\n\n"}
-			</Text>
+    fetch("https://mailr.ndsql.top/mail.php", {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      //	result.innerText = data.message;
+    })
+    .catch(err => {
+      //	result.innerText = "Error sending mail";
+    });
+    setVeriOpen(true);
+    setVailSystem(false);
+  };
 
-			<View>
-				<Text>
-					আপনার মোবাইল নাম্বার লিখুন <Text style={style.cRed}>*</Text>
-				</Text>
-				<TextInput
-					value={phoneNumber}
-					onChangeText={setPhoneNumber}
-					style={style.input}
-					keyboardType="numeric"
-					placeholder="e.g 01812345678"
-					placeholderTextColor="#888"
-				/>
+  const handelOtpCheck = () => {
+    Alert.alert("title")
+  }
 
-				<TouchableOpacity
-					onPress={numberCheck}
-					style={[style.btnT, style.btnCenter, style.btn]}
-					disabled={loading}
-				>
-					{loading ? (
-						<ActivityIndicator size="small" color="#ffffff" />
-					) : (
-						<Text style={style.btnCenter}>Proceed</Text>
-					)}
-				</TouchableOpacity>
-			</View>
+  return (
+    <View style={style.viewBox}>
+      <Text style={style.textCenter}>
+        {"\n\n\n"}
+        <Text style={style.bigText}>Create Profile</Text>
+        {"\n"}
+        <Text>
+          আমাদের সাথে যোগ দিতে আপনার ফোন নাম্বার দিয়ে ফরম পূরণ করুন
+        </Text>
+        / {"\n\n\n"}
+      </Text>
 
-			{/* ===========================Email System ================================== */}
+      <View>
+        <Text>
+          আপনার মোবাইল নাম্বার লিখুন <Text style={style.cRed}>*</Text>
+        </Text>
+        <TextInput
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          style={style.input}
+          keyboardType="numeric"
+          placeholder="e.g 01812345678"
+          placeholderTextColor="#888"
+          />
 
-			{
-				openVarify ? (
-					<Modal
-						transparent={true}
-						visible={true}
-						animationType="slide"
-						onRequestClose={() => setModalVisible(false)}
-					>
-						<View
-							style={{
-								flex: 1,
-								justifyContent: "center",
-								alignItems: "center",
-								backgroundColor: "rgba(0,0,0,0.5)"
-							}}
-						>
-							<View style={style.popup}>
-								<Text style={style.bigText}>Verify Profile</Text>
-								<View>
-									{
-										vailsystem ? (
-											<>									<Text>Email (ইচ্ছাকৃত)</Text>
-												<TextInput
-													placeholder="e.g. username@gmail.com"
-													style={style.input}
-													value={email}
-													onChangeText={text => setEmail(text)}
-													keyboardType="email-address"
-													autoCapitalize="none"
-												/>
-												<Button
-													title="Verify"
-													onPress={mailVerify}
-												/>
-											</>
-
-										) : ""
-									}
-									{/* ==========********************** Email system **************************** */}
-
-									{verOpen && (
-										<View>
-											<Text>
-												{email}
-											</Text>
-											<TextInput
-												style={style.input}
-												placeholder="Verify code"
-												keyboardType="number-pad"
-												autoFocus
-											/>
-											<Button
-												title="Verify"
-											/>
-										</View>
-									)}
-								</View>
+        <TouchableOpacity
+          onPress={numberCheck}
+          style={[style.btnT, style.btnCenter, style.btn]}
+          disabled={loading}
+          >
+          {loading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ): (
+            <Text style={style.btnCenter}>Proceed</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
 
+      {/* Already Created Modal */}
+      {currentUser && (
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+          >
+          <View
+            style={ {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)"
+            }}
+            >
+            <View style={style.popup}>
+              <Text style={style.bigText}>Already Created</Text>
+              <Text style={style.upper}>
+                +880{phoneNumber.slice(1)} এই নাম্বার ব্যবহার
+                করে ইতিমধ্যে {"\n"}{" "}
+                {dateFormate(currentUser.created_at)} তারিখে
+                প্রোফাইল তৈরি করা হয়েছে {"\n"}
+                ID: {currentUser.id} {"\n"}
+                নাম: {currentUser.name} {"\n"}
+                ঠিকানা: {currentUser.address} {"\n"}
+                রক্ত: {currentUser.bloodgroup}
+              </Text>
+              <View
+                style={ {
+                  marginTop: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between"
+                }}
+                >
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalVisible(false);
+                    setEditModalVisible(true);
+                  }}
+                  style={ {
+                    backgroundColor: "#fff",
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 5
+                  }}
+                  >
+                  <Text
+                    style={ {
+                      color: "#4680ff",
+                      fontWeight: "600"
+                    }}
+                    >
+                    Edit Profile
+                  </Text>
+                </TouchableOpacity>
 
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={ {
+                    backgroundColor: "#fff",
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 5
+                  }}
+                  >
+                  <Text
+                    style={ {
+                      color: "#ff0000",
+                      fontWeight: "600"
+                    }}
+                    >
+                    OK
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
 
-								<View
-									style={{
-										marginTop: 10,
-										flexDirection: "row",
-										justifyContent: "space-between"
-									}}
-								>
-									<TouchableOpacity
-										onPress={() => {
-											router.push("/")
-										}}
-										style={{
-											backgroundColor: "#fff",
-											paddingHorizontal: 12,
-											paddingVertical: 8,
-											borderRadius: 5
-										}}
-									>
-										<Text
-											style={{
-												color: "#4680ff",
-												fontWeight: "600"
-											}}
-										>
-											Home
-										</Text>
-									</TouchableOpacity>
+      {/* Edit Profile Modal */}
+      <Modal
+        transparent={true}
+        visible={editModalVisible}
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+        >
+        <View
+          style={ {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.5)"
+          }}
+          >
+          <View style={style.popup}>
+            <Text style={style.bigText}>Edit Profile</Text>
 
-									<TouchableOpacity
-										onPress={() => setModalVisible(false)}
-										style={{
-											backgroundColor: "#fff",
-											paddingHorizontal: 12,
-											paddingVertical: 8,
-											borderRadius: 5
-										}}
-									>
-										<Text
-											style={{
-												color: "#ff0000",
-												fontWeight: "600"
-											}}
-										>
-											Cancel
-										</Text>
-									</TouchableOpacity>
-								</View>
-							</View>
-						</View>
-					</Modal>
-				) : ""
-			}
+            <TextInput
+              value={id}
+              onChangeText={setId}
+              placeholder="Mobile Number Change"
+              style={style.input}
+              />
 
-			{/* //======================================================================= */}
+            <TextInput
+              value={editNumber}
+              onChangeText={setEditNumber}
+              placeholder="Mobile Number Change"
+              style={style.input}
+              />
 
-			{/* Already Created Modal */}
-			{currentUser && (
-				<Modal
-					transparent={true}
-					visible={modalVisible}
-					animationType="slide"
-					onRequestClose={() => setModalVisible(false)}
-				>
-					<View
-						style={{
-							flex: 1,
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "rgba(0,0,0,0.5)"
-						}}
-					>
-						<View style={style.popup}>
-							<Text style={style.bigText}>Already Created</Text>
-							<Text style={style.upper}>
-								+880{phoneNumber.slice(1)} এই নাম্বার ব্যবহার
-								করে ইতিমধ্যে {"\n"}{" "}
-								{dateFormate(currentUser.created_at)} তারিখে
-								প্রোফাইল তৈরি করা হয়েছে {"\n"}
-								ID: {currentUser.id} {"\n"}
-								নাম: {currentUser.name} {"\n"}
-								ঠিকানা: {currentUser.address} {"\n"}
-								রক্ত: {currentUser.bloodgroup}
-							</Text>
-							<View>
-								<Button
-									title="Verify Profile"
-									onPress={() => {
-										setOpenVarify(true);
-										setModalVisible(false);
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									marginTop: 10,
-									flexDirection: "row",
-									justifyContent: "space-between"
-								}}
-							>
-								<TouchableOpacity
-									onPress={() => {
-										setModalVisible(false);
-										setEditModalVisible(true);
-									}}
-									style={{
-										backgroundColor: "#fff",
-										paddingHorizontal: 12,
-										paddingVertical: 8,
-										borderRadius: 5
-									}}
-								>
-									<Text
-										style={{
-											color: "#4680ff",
-											fontWeight: "600"
-										}}
-									>
-										Edit Profile
-									</Text>
-								</TouchableOpacity>
+            <TextInput
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="নাম পরিবর্তন করুন"
+              style={style.input}
+              />
+            <TextInput
+              value={editAddress}
+              onChangeText={setEditAddress}
+              placeholder="ঠিকানা পরিবর্তন করুন"
+              style={style.input}
+              />
+            <TextInput
+              value={editBlood}
+              onChangeText={setEditBlood}
+              placeholder="রক্তের গ্রুপ পরিবর্তন করুন"
+              style={style.input}
+              />
 
-								<TouchableOpacity
-									onPress={() => setModalVisible(false)}
-									style={{
-										backgroundColor: "#fff",
-										paddingHorizontal: 12,
-										paddingVertical: 8,
-										borderRadius: 5
-									}}
-								>
-									<Text
-										style={{
-											color: "#ff0000",
-											fontWeight: "600"
-										}}
-									>
-										OK
-									</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</View>
-				</Modal>
-			)}
+            <View
+              style={ {
+                marginTop: 10,
+                flexDirection: "row",
+                justifyContent: "space-between"
+              }}
+              >
+              <TouchableOpacity
+                onPress={() => {
+                  Linking.openURL(
+                    `mailto:nahid@ndsql.top?subject=Edit PabnaBloodFind Profile Id:${id}&body=${JSON.stringify(
+                      jsonData
+                    )}`
+                  );
+                }}
+                style={ {
+                  backgroundColor: "#fff",
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 5
+                }}
+                >
+                <Text
+                  style={ {
+                    color: "#4680ff",
+                    fontWeight: "600"
+                  }}
+                  >
+                  Save Edit
+                </Text>
+              </TouchableOpacity>
 
-			{/* Edit Profile Modal */}
-			<Modal
-				transparent={true}
-				visible={editModalVisible}
-				animationType="slide"
-				onRequestClose={() => setEditModalVisible(false)}
-			>
-				<View
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-						backgroundColor: "rgba(0,0,0,0.5)"
-					}}
-				>
-					<View style={style.popup}>
-						<Text style={style.bigText}>Edit Profile</Text>
-
-						<TextInput
-							value={id}
-							onChangeText={setId}
-							placeholder="Mobile Number Change"
-							style={style.input}
-						/>
-
-						<TextInput
-							value={editNumber}
-							onChangeText={setEditNumber}
-							placeholder="Mobile Number Change"
-							style={style.input}
-						/>
-
-						<TextInput
-							value={editName}
-							onChangeText={setEditName}
-							placeholder="নাম পরিবর্তন করুন"
-							style={style.input}
-						/>
-						<TextInput
-							value={editAddress}
-							onChangeText={setEditAddress}
-							placeholder="ঠিকানা পরিবর্তন করুন"
-							style={style.input}
-						/>
-						<TextInput
-							value={editBlood}
-							onChangeText={setEditBlood}
-							placeholder="রক্তের গ্রুপ পরিবর্তন করুন"
-							style={style.input}
-						/>
-
-						<View
-							style={{
-								marginTop: 10,
-								flexDirection: "row",
-								justifyContent: "space-between"
-							}}
-						>
-							<TouchableOpacity
-								onPress={() => {
-									Linking.openURL(
-										`mailto:nahid@ndsql.top?subject=Edit PabnaBloodFind Profile Id:${id}&body=${JSON.stringify(
-											jsonData
-										)}`
-									);
-								}}
-								style={{
-									backgroundColor: "#fff",
-									paddingHorizontal: 12,
-									paddingVertical: 8,
-									borderRadius: 5
-								}}
-							>
-								<Text
-									style={{
-										color: "#4680ff",
-										fontWeight: "600"
-									}}
-								>
-									Save Edit
-								</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								onPress={() => setEditModalVisible(false)}
-								style={{
-									backgroundColor: "#fff",
-									paddingHorizontal: 12,
-									paddingVertical: 8,
-									borderRadius: 5
-								}}
-							>
-								<Text
-									style={{
-										color: "#ff0000",
-										fontWeight: "600"
-									}}
-								>
-									Close
-								</Text>
-							</TouchableOpacity>
-						</View>
-					</View>
-				</View>
-			</Modal>
-		</View>
-	);
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(false)}
+                style={ {
+                  backgroundColor: "#fff",
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 5
+                }}
+                >
+                <Text
+                  style={ {
+                    color: "#ff0000",
+                    fontWeight: "600"
+                  }}
+                  >
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
 }

@@ -1,70 +1,267 @@
-import { useLocalSearchParams, router } from "expo-router";
-import { View, Text, Button, TextInput, ScrollView, Alert } from "react-native";
+import {
+  useLocalSearchParams,
+  router
+} from "expo-router";
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  Alert,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator
+} from "react-native";
+import {
+  useState
+} from "react";
 import style from "./style/style";
-import { useState } from "react";
 
 export default function NewAdd() {
-	const { mobileNumber } = useLocalSearchParams();
 
-	return (
-		<ScrollView
-			showsVerticalScrollIndicator={false}
-			contentContainerStyle={{ paddingBottom: 80 }}
-		>
-			<View style={style.viewBox}>
-				<Text style={{ fontSize: 22, textAlign: "center" }}>
-					Profile Info
-				</Text>
+  const [loading,
+    setLoading] = useState(false);
 
-				<Text style={{ textAlign: "center" }}>
-					👤 আপনার প্রোফাইল ভেরিফাই করতে এবং ✅ ভেরিফাইড ব্যাজ পেতে
-					অনুগ্রহ করে 📧 আপনার ইমেইল ঠিকানাটি ভেরিফাই করুন। ইমেইল
-					ভেরিফিকেশন সম্পন্ন হলে আপনার প্রোফাইল আরও নিরাপদ হবে এবং
-					স্বয়ংক্রিয়ভাবে ভেরিফিকেশন প্রক্রিয়া সম্পন্ন হবে।
-				</Text>
+  const modalStyles = StyleSheet.create({
+    modalBackground: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.5)"
+    },
+    modalContainer: {
+      backgroundColor: "#fff",
+      width: "80%",
+      borderRadius: 10,
+      padding: 20
+    },
+    modalButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: "#ddd"
+    }
+  });
 
-				<Text>(*) আবশ্যিক পূরণ করতে হবে।</Text>
+  const bloodGroups = [
+    "A+",
+    "A-",
+    "B+",
+    "B-",
+    "AB+",
+    "AB-",
+    "O+",
+    "O-"
+  ];
 
-				<View>
-					<Text>Mobile Number*</Text>
-					<TextInput
-						placeholder="Mobile Number"
-						style={style.input}
-						value={mobileNumber}
-					/>
-				</View>
+  const {
+    mobileNumber
+  } = useLocalSearchParams();
 
-				<View>
-					<Text>WhatsApp Number (ইচ্ছাকৃত)</Text>
-					<TextInput
-						placeholder="e.g. 01812345678"
-						style={style.input}
-					/>
-				</View>
+  const [whatsapp,
+    setWhatsapp] = useState("");
+  const [fullName,
+    setFullName] = useState("");
+  const [address,
+    setAddress] = useState("");
+  const [bloodGroup,
+    setBloodGroup] = useState("");
+  const [gender,
+    setGender] = useState("");
 
-				<View>
-					<Text>Full Name*</Text>
-					<TextInput
-						placeholder="e.g. Md. Roni Hossen"
-						style={style.input}
-					/>
-				</View>
+  const [bloodModal,
+    setBloodModal] = useState(false);
+  const [genderModal,
+    setGenderModal] = useState(false);
 
-				<View>
-					<Text>Address* (Bangla)</Text>
-					<TextInput
-						placeholder="e.g. রঘুনাথপুর, আতাইকুলা, পাবনা"
-						style={style.input}
-					/>
-				</View>
+  const handleSubmit = () => {
 
-				<View>
-					<Text>Blood Group*</Text>
-					<TextInput placeholder="AB+" style={style.input} />
-				</View>
+    if (!mobileNumber || !bloodGroup || !gender || !fullName || !address) {
+      Alert.alert("ভুল হয়েছে", "অনুগ্রহ করে সব আবশ্যিক (*) তথ্য পূরণ করুন");
+      return;
+    }
 
-				<Button title="Add Profile" onPress={() => router.back()} />
-			</View>
-		</ScrollView>
-	);
+    const profileData = {
+      phone: mobileNumber,
+      whatsapp_number: whatsapp || null,
+      name: fullName,
+      address: address,
+      bloodgroup: bloodGroup,
+      gender: gender
+    };
+
+    setLoading(true);
+
+    fetch("https://api.ndsql.top/pabnaBoldFind/post/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(profileData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      setLoading(false);
+
+      if (data.success) {
+        Alert.alert(
+          "সফল হয়েছে 🎉",
+          "আপনার প্রোফাইল সফলভাবে তৈরি করা হয়েছে"
+        );
+        router.back();
+      } else {
+        Alert.alert(
+          "সমস্যা হয়েছে",
+          data.message || "এই মোবাইল নম্বর দিয়ে ইতিমধ্যে প্রোফাইল আছে"
+        );
+      }
+    })
+    .catch(() => {
+      setLoading(false);
+      Alert.alert(
+        "সার্ভার সমস্যা",
+        "সার্ভারের সাথে সংযোগ করা যায়নি, পরে আবার চেষ্টা করুন"
+      );
+    });
+  };
+
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={ { paddingBottom: 80 }}
+      >
+      <View style={style.viewBox}>
+
+        <Text style={ { fontSize: 22,
+          textAlign: "center" }}>
+          প্রোফাইল তথ্য
+        </Text>
+        <Text>(*) আবশ্যিক পূরণ করতে হবে</Text>
+
+        {/* Mobile */}
+        <View>
+          <Text>মোবাইল নাম্বার*</Text>
+          <TextInput
+            style={style.input}
+            value={mobileNumber}
+            editable={false}
+            />
+        </View>
+
+        {/* WhatsApp */}
+        <View>
+          <Text>WhatsApp নাম্বার (ঐচ্ছিক)</Text>
+          <TextInput
+            style={style.input}
+            placeholder="e.g. 01812345678"
+            keyboardType="phone-pad"
+            value={whatsapp}
+            onChangeText={setWhatsapp}
+            />
+        </View>
+
+        {/* Blood */}
+        <View>
+          <Text>রক্তের গ্রুপ*</Text>
+          <TouchableOpacity
+            style={style.input}
+            onPress={() => setBloodModal(true)}
+            >
+            <Text>{bloodGroup || "রক্তের গ্রুপ নির্বাচন করুন"}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Gender */}
+        <View>
+          <Text>লিঙ্গ*</Text>
+          <TouchableOpacity
+            style={style.input}
+            onPress={() => setGenderModal(true)}
+            >
+            <Text>{gender || "লিঙ্গ নির্বাচন করুন"}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Name */}
+        <View>
+          <Text>পূর্ণ নাম*</Text>
+          <TextInput
+            style={style.input}
+            placeholder="যেমনঃ মোঃ রনি হোসেন"
+            value={fullName}
+            onChangeText={setFullName}
+            />
+        </View>
+
+        {/* Address */}
+        <View>
+          <Text>ঠিকানা (বাংলা)*</Text>
+          <TextInput
+            style={style.input}
+            placeholder="যেমনঃ রঘুনাথপুর, আতাইকুলা, পাবনা"
+            value={address}
+            onChangeText={setAddress}
+            />
+        </View>
+
+        <TouchableOpacity
+          style={[style.btnT,
+            style.btnCenter,
+            style.btn]}
+          onPress={handleSubmit}
+          disabled={loading}
+          >
+          {loading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ): (
+            <Text style={style.btnCenter}>প্রোফাইল তৈরি করুন</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Blood Modal */}
+      <Modal transparent animationType="fade" visible={bloodModal}>
+        <View style={modalStyles.modalBackground}>
+          <View style={modalStyles.modalContainer}>
+            {bloodGroups.map((item, i) => (
+              <TouchableOpacity
+                key={i}
+                style={modalStyles.modalButton}
+                onPress={() => {
+                  setBloodGroup(item);
+                  setBloodModal(false);
+                }}
+                >
+                <Text>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Gender Modal */}
+      <Modal transparent animationType="fade" visible={genderModal}>
+        <View style={modalStyles.modalBackground}>
+          <View style={modalStyles.modalContainer}>
+            {["Male",
+              "Female",
+              "Other"].map((item, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={modalStyles.modalButton}
+                  onPress={() => {
+                    setGender(item);
+                    setGenderModal(false);
+                  }}
+                  >
+                  <Text>{item}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
+        </View>
+      </Modal>
+
+    </ScrollView>
+  );
 }

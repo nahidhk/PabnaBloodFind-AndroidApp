@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState
+} from "react";
 import {
   View,
   Text,
@@ -10,227 +13,167 @@ import {
   Modal,
   StyleSheet,
 } from "react-native";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  FontAwesome
+} from "@expo/vector-icons";
+
 import style from "./style/style";
 import Loadding from "@/components/Loadding";
 import ErrJsonx from "@/components/ErrJsonx";
 import serverLink from "@/components/ServerLink";
 
 export default function Home() {
-  const [searchText, setSearchText] = useState("");
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [value, setValue] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [searchText,
+    setSearchText] = useState("");
+  const [users,
+    setUsers] = useState([]);
+  const [loading,
+    setLoading] = useState(true);
+  const [error,
+    setError] = useState(false);
 
-  const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  const [bloodFilter,
+    setBloodFilter] = useState("");
+  const [modalVisible,
+    setModalVisible] = useState(false);
+
+  const bloodGroups = ["A+",
+    "A-",
+    "B+",
+    "B-",
+    "AB+",
+    "AB-",
+    "O+",
+    "O-"];
 
   // ===============================
-  // Fetch Users
+  // FETCH USERS ON MOUNT ONLY
   // ===============================
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       try {
+        setLoading(true);
         const icx = await serverLink();
-        if (icx.serverLink) {
-          const res = await fetch(icx.serverLink);
-          const data = await res.json();
-          setUsers(Array.isArray(data) ? data : []);
-        }
-        setLoading(false);
+        if (!icx?.serverLink) throw new Error("Server link not found");
+
+        const res = await fetch(icx.serverLink);
+        const data = await res.json();
+
+        setUsers(Array.isArray(data) ? data: []);
+        setError(false);
       } catch (err) {
-        console.error("Fetch Error:", err);
+        console.log("Fetch error:", err);
         setError(true);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchUsers();
+  },
+    []);
 
   // ===============================
-  // Helpers
+  // HELPERS
   // ===============================
-  function genderX(gender) {
+  const genderX = (gender) => {
     if (!gender) return "⚧ Unknown";
     if (gender.toLowerCase() === "male") return "♂️ Male";
     if (gender.toLowerCase() === "female") return "♀️ Female";
-    return "⚧️ Other";
-  }
+    return "⚧ Other";
+  };
 
-  function getFirstLetter(name) {
+  const getFirstLetter = (name) => {
     if (!name) return "?";
     return name.charAt(0).toUpperCase();
-  }
+  };
 
   // ===============================
-  // Filtered Users
+  // FILTER USERS
   // ===============================
   const filteredUsers = users.filter((user) => {
     const bloodMatch =
-      value === "" ||
-      user.bloodgroup.toUpperCase().includes(value.toUpperCase());
+    bloodFilter === "" ||
+    user.bloodgroup?.toUpperCase().includes(bloodFilter.toUpperCase());
 
     const searchMatch =
-      searchText === "" ||
-      user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.address.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.phone.includes(searchText);
+    searchText === "" ||
+    user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+    user.phone?.includes(searchText) ||
+    user.address?.toLowerCase().includes(searchText.toLowerCase()); // <-- ঠিকানা দিয়ে সার্চ
 
     return bloodMatch && searchMatch;
   });
-
   // ===============================
-  // Loading / Error
+  // LOADING / ERROR UI
   // ===============================
   if (loading) return <Loadding />;
   if (error) return <ErrJsonx />;
 
   // ===============================
-  // UI
+  // MAIN UI
   // ===============================
   return (
-    <ScrollView
-      style={{ backgroundColor: "#f9f9f9", flex: 1 }}
-      contentContainerStyle={{ paddingBottom: 50 }}
-    >
-
-      
+    <ScrollView style={ { flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={ { paddingBottom: 50 }}>
       <View style={style.viewBoxi}>
-        <View style={{ margin: 10, zIndex: 1000 }}>
-          <Text style={{ marginBottom: 5, fontWeight: "bold", fontSize: 16 }}>
+        {/* ================= FILTER ================= */}
+        <View style={ { margin: 10 }}>
+          <Text style={ { fontWeight: "bold", fontSize: 16 }}>
             <FontAwesome name="filter" size={18} color="#2825d3ff" /> Filters
           </Text>
 
-          {/* ================= Blood select button ================= */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#eee",
-              padding: 10,
-              borderRadius: 8,
-              marginBottom: 10,
-            }}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={{ fontSize: 16 }}>
-              {value ? `Selected Blood: ${value}` : "Select Blood"}
-            </Text>
+          <TouchableOpacity style={style.input} onPress={() => setModalVisible(true)}>
+            <Text>{bloodFilter ? `Selected Blood ➤ ${bloodFilter}`: "Select Blood"}</Text>
           </TouchableOpacity>
 
-          {/* ================= Search input ================= */}
           <TextInput
             style={style.input}
-            placeholder="খুঁজুন ➤ নাম, ঠিকানা ও ফোন নাম্বার দিয়ে"
+            placeholder="খুঁজুন ➤ নাম বা ফোন নাম্বার"
             value={searchText}
-            onChangeText={(text) => setSearchText(text)}
-          />
+            onChangeText={setSearchText}
+            />
         </View>
 
-        {/* ================= User List ================= */}
+        {/* ================= USER LIST ================= */}
         {filteredUsers.length === 0 ? (
-          <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
-            দুঃখিত  এই গ্রুপের এখনও কোনো রক্তদাতা যুক্ত হননি। 😕
+          <Text style={ { textAlign: "center", marginTop: 20, color: "#999" }}>
+            দুঃখিত, কোনো রক্তদাতা পাওয়া যায়নি 😕
           </Text>
-        ) : (
+        ): (
           filteredUsers.map((user, index) => (
             <View key={index} style={style.userBox}>
               {user.avater_url ? (
-                <Image
-                  source={{ uri: user.avater_url }}
-                  style={style.profileImage}
-                />
-              ) : (
-                <View
-                  style={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: 35,
-                    backgroundColor: "#007bff",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 32,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {getFirstLetter(user.name)}
-                  </Text>
+                <Image source={ { uri: user.avater_url }} style={style.profileImage} />
+              ): (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{getFirstLetter(user.name)}</Text>
                 </View>
               )}
 
-              <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={ { flex: 1, marginLeft: 12 }}>
                 <Text style={style.userName}>
                   {user.name}{" "}
-                  {user.v == 1 && (
-                    <MaterialIcons
-                      name="verified"
-                      size={18}
-                      color="#007bff"
-                    />
-                  )}
+                  {user.v == 1 && <MaterialIcons name="verified" size={18} color="#007bff" />}
                 </Text>
 
-                <Text style={style.userDetail}>📞 +880{user.phone}</Text>
-
-                <Text style={style.userDetail}>
-                  🩸 Blood:{" "}
-                  <Text
-                    style={{
-                      color: "red",
-                      fontWeight: "bold",
-                      fontSize: 18,
-                    }}
-                  >
-                    {user.bloodgroup}
-                  </Text>
+                <Text>📞 +880{user.phone}</Text>
+                <Text>
+                  🩸 Blood: <Text style={ { color: "red", fontWeight: "bold" }}>{user.bloodgroup}</Text>
                 </Text>
-
-                <Text style={style.userDetail}>📍 {user.address}</Text>
-                <Text style={style.userDetail}>{genderX(user.gender)}</Text>
+                <Text>📍 {user.address}</Text>
+                <Text>{genderX(user.gender)}</Text>
 
                 <View style={style.socialRow}>
                   {user.whatsapp_number && (
-                    <TouchableOpacity
-                      onPress={() =>
-                        Linking.openURL(`https://wa.me/${user.whatsapp_number}`)
-                      }
-                    >
-                      <FontAwesome
-                        name="whatsapp"
-                        size={27}
-                        color="#25D366"
-                      />
+                    <TouchableOpacity onPress={() => Linking.openURL(`https://wa.me/${user.whatsapp_number}`)}>
+                      <FontAwesome name="whatsapp" size={26} color="#25D366" />
                     </TouchableOpacity>
                   )}
 
-                  <TouchableOpacity
-                    onPress={() => Linking.openURL(`tel:+880${user.phone}`)}
-                    style={{ marginLeft: 10 }}
-                  >
-                    <FontAwesome
-                      name="phone-square"
-                      size={25}
-                      color="#4680ff"
-                    />
+                  <TouchableOpacity style={ { marginLeft: 10 }} onPress={() => Linking.openURL(`tel:+880${user.phone}`)}>
+                    <FontAwesome name="phone-square" size={25} color="#4680ff" />
                   </TouchableOpacity>
-
-                  {user.facebook && (
-                    <TouchableOpacity
-                      onPress={() => Linking.openURL(user.facebook)}
-                      style={{ marginLeft: 10 }}
-                    >
-                      <FontAwesome
-                        name="telegram-square"
-                        size={25}
-                        color="#1877F2"
-                      />
-                    </TouchableOpacity>
-                  )}
                 </View>
               </View>
             </View>
@@ -238,34 +181,32 @@ export default function Home() {
         )}
       </View>
 
-      {/* ================= Blood Modal ================= */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/* ================= BLOOD MODAL ================= */}
+      <Modal transparent visible={modalVisible} animationType="fade">
         <View style={modalStyles.modalBackground}>
           <View style={modalStyles.modalContainer}>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>Select Blood</Text>
-            {bloodGroups.map((bg, index) => (
+            <TouchableOpacity
+              style={modalStyles.modalButton}
+              onPress={() => {
+                setBloodFilter("");
+                setModalVisible(false);
+              }}
+              >
+              <Text>All Blood</Text>
+            </TouchableOpacity>
+
+            {bloodGroups.map((bg, i) => (
               <TouchableOpacity
-                key={index}
+                key={i}
                 style={modalStyles.modalButton}
                 onPress={() => {
-                  setValue(bg);
+                  setBloodFilter(bg);
                   setModalVisible(false);
                 }}
-              >
-                <Text style={{ fontSize: 16 }}>{bg}</Text>
+                >
+                <Text>{bg}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              style={[modalStyles.modalButton, { backgroundColor: "#eee" }]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={{ fontSize: 16 }}>Cancel</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -273,23 +214,38 @@ export default function Home() {
   );
 }
 
-const modalStyles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContainer: {
-    backgroundColor: "#fff",
-    width: "80%",
-    borderRadius: 10,
-    padding: 20,
-  },
-  modalButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-});
+  const styles = StyleSheet.create({
+    avatar: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      backgroundColor: "#007bff",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    avatarText: {
+      color: "#fff",
+      fontSize: 30,
+      fontWeight: "bold",
+    },
+  });
+
+  const modalStyles = StyleSheet.create({
+    modalBackground: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContainer: {
+      backgroundColor: "#fff",
+      width: "80%",
+      borderRadius: 10,
+      padding: 20,
+    },
+    modalButton: {
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: "#ddd",
+    },
+  });

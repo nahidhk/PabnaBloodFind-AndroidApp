@@ -129,7 +129,7 @@ export default function Home() {
 
           <TextInput
             style={style.input}
-            placeholder="খুঁজুন ➤ নাম বা ফোন নাম্বার"
+            placeholder="খুঁজুন ➤ নাম, ঠিকানা বা ফোন নাম্বার"
             value={searchText}
             onChangeText={setSearchText}
             />
@@ -143,8 +143,8 @@ export default function Home() {
         ): (
           filteredUsers.map((user, index) => (
             <View key={index} style={style.userBox}>
-              {user.avater_url ? (
-                <Image source={ { uri: user.avater_url }} style={style.profileImage} />
+              {user.avatar_url ? (
+                <Image source={ { uri: user.avatar_url }} style={style.profileImage} />
               ): (
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>{getFirstLetter(user.name)}</Text>
@@ -157,7 +157,7 @@ export default function Home() {
                   {user.v == 1 && <MaterialIcons name="verified" size={18} color="#007bff" />}
                 </Text>
 
-                <Text>📞 +880{user.phone}</Text>
+                <Text>📞 +88{user.phone}</Text>
                 <Text>
                   🩸 Blood: <Text style={ { color: "red", fontWeight: "bold" }}>{user.bloodgroup}</Text>
                 </Text>
@@ -166,12 +166,13 @@ export default function Home() {
 
                 <View style={style.socialRow}>
                   {user.whatsapp_number && (
-                    <TouchableOpacity onPress={() => Linking.openURL(`https://wa.me/${user.whatsapp_number}`)}>
+                    <TouchableOpacity onPress={() =>
+                      Linking.openURL(`https://wa.me/+88${user.whatsapp_number}`)}>
                       <FontAwesome name="whatsapp" size={26} color="#25D366" />
                     </TouchableOpacity>
                   )}
 
-                  <TouchableOpacity style={ { marginLeft: 10 }} onPress={() => Linking.openURL(`tel:+880${user.phone}`)}>
+                  <TouchableOpacity style={ { marginLeft: 10 }} onPress={() => Linking.openURL(`tel:+88${user.phone}`)}>
                     <FontAwesome name="phone-square" size={25} color="#4680ff" />
                   </TouchableOpacity>
                 </View>

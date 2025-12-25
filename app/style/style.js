@@ -136,8 +136,8 @@ export default StyleSheet.create({
     elevation: 7,
   },
   profileImage: {
-    width: 95,
-    height: 95,
+    width: 70,
+    height: 70,
     borderRadius: 50,
     marginRight: 18,
     borderWidth: 2,

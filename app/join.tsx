@@ -145,77 +145,19 @@ export default function Join() {
     setLoading(false);
   };
 
-  // email system
-
-  const validateEmail = vemail => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
-
-  const [email,
-    setEmail] = useState("");
-  const [verOpen,
-    setVeriOpen] = useState(false);
-
-  const mailVerify = () => {
-    if (!email || !validateEmail(email)) {
-      Alert.alert("Warning", "অনুগ্রহ করে সঠিক ইমেইল লিখুন");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("to", email);
-    formData.append("username", "pabnaBoldFind");
-    formData.append(
-      "subject",
-      `PabnaBloodFind App verification code ${otp}`
-    );
-    formData.append(
-      "message",
-      `
-      Hello ${currentUser.name},
-
-      Your mobile number (+88${phoneNumber}) has been successfully registered with the PabnaBoldFind Android App.
-
-      Your email verification code is: ${otp}
-
-      Please complete the verification to enable your verified account.
-
-      Thank you,
-      NdSQL Team
-
-
-      `
-    );
-
-    fetch("https://mailr.ndsql.top/mail.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      //	result.innerText = data.message;
-    })
-    .catch(err => {
-      //	result.innerText = "Error sending mail";
-    });
-    setVeriOpen(true);
-    setVailSystem(false);
-  };
-
-  const handelOtpCheck = () => {
-    Alert.alert("title")
-  }
+  
+ 
 
   return (
     <View style={style.viewBox}>
       <Text style={style.textCenter}>
         {"\n\n\n"}
-        <Text style={style.bigText}>Create Profile</Text>
+        <Text style={style.bigText}>প্রোফাইল তৈরি করুন</Text>
         {"\n"}
         <Text>
           আমাদের সাথে যোগ দিতে আপনার ফোন নাম্বার দিয়ে ফরম পূরণ করুন
         </Text>
-        / {"\n\n\n"}
+         {"\n\n\n"}
       </Text>
 
       <View>
@@ -239,7 +181,7 @@ export default function Join() {
           {loading ? (
             <ActivityIndicator size="small" color="#ffffff" />
           ): (
-            <Text style={style.btnCenter}>Proceed</Text>
+            <Text style={style.btnCenter}>এগিয়ে যান</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -387,7 +329,7 @@ export default function Join() {
               <TouchableOpacity
                 onPress={() => {
                   Linking.openURL(
-                    `mailto:nahid@ndsql.top?subject=Edit PabnaBloodFind Profile Id:${id}&body=${JSON.stringify(
+                    `mailto:nahidhk2007@gmail.com?subject=Edit PabnaBloodFind Profile Id:${id}&body=${JSON.stringify(
                       jsonData
                     )}`
                   );

@@ -120,11 +120,11 @@ export default function Home() {
         {/* ================= FILTER ================= */}
         <View style={ { margin: 10 }}>
           <Text style={ { fontWeight: "bold", fontSize: 16 }}>
-            <FontAwesome name="filter" size={18} color="#2825d3ff" /> Filters
+            <FontAwesome name="filter" size={18} color="#2825d3ff" /> ফিল্টার করুন
           </Text>
 
           <TouchableOpacity style={style.input} onPress={() => setModalVisible(true)}>
-            <Text>{bloodFilter ? `Selected Blood ➤ ${bloodFilter}`: "Select Blood"}</Text>
+            <Text>{bloodFilter ? `নির্বাচিত রক্ত ➤ ${bloodFilter}`: "রক্ত নির্বাচন করুন"}</Text>
           </TouchableOpacity>
 
           <TextInput

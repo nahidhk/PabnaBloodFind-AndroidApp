@@ -120,7 +120,7 @@ export default function Navbar() {
           <Feather name="chrome" color="#000" size={18} /> প্রধান ওয়েবসাইট
         </Text>
         <Text onPress={() => { Linking.openURL("https://www.supportkori.com/nahidhk"); toggleMenu(); }} style={[style.btn, style.btnT, style.mybtn]}>
-          <Feather name="dollar-sign" color="#000" size={18} /> দয়া করে সমর্থন করুন
+          <Feather name="dollar-sign" color="#000" size={18} /> সমর্থন করুন
         </Text>
       </Animated.View >
     </>

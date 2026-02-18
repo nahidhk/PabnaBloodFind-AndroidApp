@@ -220,5 +220,5 @@ export default StyleSheet.create({
     elevation: 7,
     backgroundColor: "#fff",
     marginVertical: 6,
-  },
+  }
 });

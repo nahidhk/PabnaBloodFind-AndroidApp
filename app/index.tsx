@@ -60,7 +60,7 @@ export default function Home() {
         const res = await fetch(icx.serverLink);
         const data = await res.json();
 
-        setUsers(Array.isArray(data) ? data: []);
+        setUsers(Array.isArray(data) ? data : []);
         setError(false);
       } catch (err) {
         console.log("Fetch error:", err);
@@ -94,14 +94,14 @@ export default function Home() {
   // ===============================
   const filteredUsers = users.filter((user) => {
     const bloodMatch =
-    bloodFilter === "" ||
-    user.bloodgroup?.toUpperCase().includes(bloodFilter.toUpperCase());
+      bloodFilter === "" ||
+      user.bloodgroup?.toUpperCase().includes(bloodFilter.toUpperCase());
 
     const searchMatch =
-    searchText === "" ||
-    user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-    user.phone?.includes(searchText) ||
-    user.address?.toLowerCase().includes(searchText.toLowerCase()); // <-- ঠিকানা দিয়ে সার্চ
+      searchText === "" ||
+      user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.phone?.includes(searchText) ||
+      user.address?.toLowerCase().includes(searchText.toLowerCase()); // <-- ঠিকানা দিয়ে সার্চ
 
     return bloodMatch && searchMatch;
   });
@@ -115,43 +115,44 @@ export default function Home() {
   // MAIN UI
   // ===============================
   return (
-    <ScrollView style={ { flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={ { paddingBottom: 50 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{ paddingBottom: 50 }}>
       <View style={style.viewBoxi}>
         {/* ================= FILTER ================= */}
-        <View style={ { margin: 10 }}>
-          <Text style={ { fontWeight: "bold", fontSize: 16 }}>
+        <View style={{ margin: 10 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 16 }}>
             <FontAwesome name="filter" size={18} color="#2825d3ff" /> ফিল্টার করুন
           </Text>
 
           <TouchableOpacity style={style.input} onPress={() => setModalVisible(true)}>
-            <Text>{bloodFilter ? `নির্বাচিত রক্ত ➤ ${bloodFilter}`: "রক্ত নির্বাচন করুন"}</Text>
+            <Text>{bloodFilter ? `নির্বাচিত রক্ত ➤ ${bloodFilter}` : "রক্ত নির্বাচন করুন"}</Text>
           </TouchableOpacity>
-
           <TextInput
             style={style.input}
             placeholder="খুঁজুন ➤ নাম, ঠিকানা বা ফোন নাম্বার"
             value={searchText}
             onChangeText={setSearchText}
-            />
+            placeholderTextColor="#555"
+          />
+
         </View>
 
         {/* ================= USER LIST ================= */}
         {filteredUsers.length === 0 ? (
-          <Text style={ { textAlign: "center", marginTop: 20, color: "#999" }}>
+          <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
             দুঃখিত, কোনো রক্তদাতা পাওয়া যায়নি 😕
           </Text>
-        ): (
+        ) : (
           filteredUsers.map((user, index) => (
             <View key={index} style={style.userBox}>
               {user.avatar_url ? (
-                <Image source={ { uri: user.avatar_url }} style={style.profileImage} />
-              ): (
+                <Image source={{ uri: user.avatar_url }} style={style.profileImage} />
+              ) : (
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>{getFirstLetter(user.name)}</Text>
                 </View>
               )}
 
-              <View style={ { flex: 1, marginLeft: 12 }}>
+              <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={style.userName}>
                   {user.name}{" "}
                   {user.v == 1 && <MaterialIcons name="verified" size={18} color="#007bff" />}
@@ -159,7 +160,7 @@ export default function Home() {
 
                 <Text>📞 +88{user.phone}</Text>
                 <Text>
-                  🩸 Blood: <Text style={ { color: "red", fontWeight: "bold" }}>{user.bloodgroup}</Text>
+                  🩸 Blood: <Text style={{ color: "red", fontWeight: "bold" }}>{user.bloodgroup}</Text>
                 </Text>
                 <Text>📍 {user.address}</Text>
                 <Text>{genderX(user.gender)}</Text>
@@ -172,7 +173,7 @@ export default function Home() {
                     </TouchableOpacity>
                   )}
 
-                  <TouchableOpacity style={ { marginLeft: 10 }} onPress={() => Linking.openURL(`tel:+88${user.phone}`)}>
+                  <TouchableOpacity style={{ marginLeft: 10 }} onPress={() => Linking.openURL(`tel:+88${user.phone}`)}>
                     <FontAwesome name="phone-square" size={25} color="#4680ff" />
                   </TouchableOpacity>
                 </View>
@@ -192,7 +193,7 @@ export default function Home() {
                 setBloodFilter("");
                 setModalVisible(false);
               }}
-              >
+            >
               <Text>All Blood</Text>
             </TouchableOpacity>
 
@@ -204,7 +205,7 @@ export default function Home() {
                   setBloodFilter(bg);
                   setModalVisible(false);
                 }}
-                >
+              >
                 <Text>{bg}</Text>
               </TouchableOpacity>
             ))}
@@ -215,38 +216,38 @@ export default function Home() {
   );
 }
 
-  const styles = StyleSheet.create({
-    avatar: {
-      width: 70,
-      height: 70,
-      borderRadius: 35,
-      backgroundColor: "#007bff",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    avatarText: {
-      color: "#fff",
-      fontSize: 30,
-      fontWeight: "bold",
-    },
-  });
+const styles = StyleSheet.create({
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#007bff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+});
 
-  const modalStyles = StyleSheet.create({
-    modalBackground: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    modalContainer: {
-      backgroundColor: "#fff",
-      width: "80%",
-      borderRadius: 10,
-      padding: 20,
-    },
-    modalButton: {
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: "#ddd",
-    },
-  });
+const modalStyles = StyleSheet.create({
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    width: "80%",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+});
